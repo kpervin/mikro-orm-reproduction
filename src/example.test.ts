@@ -1,69 +1,16 @@
-import {
-  OneToMany,
-  Opt,
-  PrimaryKey,
-  Ref,
-  ScalarReference,
-} from "@mikro-orm/core";
-import {
-  Collection,
-  Entity,
-  ManyToOne,
-  MikroORM,
-  Property,
-} from "@mikro-orm/sqlite";
+import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 
-@Entity()
-class User {
-  @PrimaryKey()
-  id!: number;
-
-  @Property()
-  name: string;
-
-  @Property({ unique: true })
-  email: string;
-
-  @OneToMany(() => Post, "user")
-  posts = new Collection<Post>(this);
-
-  @Property({
-    formula: (a) => /*language=sql*/ `
-        ( EXISTS (
-            SELECT 1
-            FROM post p
-            WHERE p.title = 'bar'
-            ))`,
-    type: "boolean",
-    lazy: true,
-    persist: false,
-  })
-  hasBarPost!: Opt & Ref<boolean>;
-
-  constructor(name: string, email: string) {
-    this.name = name;
-    this.email = email;
-  }
-}
-
-@Entity()
-class Post {
-  @PrimaryKey()
-  id!: number;
-
-  @Property()
-  title!: string;
-
-  @ManyToOne()
-  user!: User;
-}
+import { MikroORM } from "@mikro-orm/sqlite";
+import { Post } from "./entities/post.entity";
+import { User } from "./entities/user.entity";
 
 let orm: MikroORM;
 
 beforeAll(async () => {
   orm = await MikroORM.init({
+    metadataProvider: TsMorphMetadataProvider,
     dbName: ":memory:",
-    entities: [User],
+    entities: [User, Post],
     debug: ["query", "query-params"],
     allowGlobalContext: true, // only for testing
   });
