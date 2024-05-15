@@ -48,7 +48,15 @@ test("basic CRUD example", async () => {
       populate: ["favoritePost1", "posts", "favoritePost2", "favoritePost3"],
     },
   );
+  const user1 = await orm.em.findOneOrFail(
+    User,
+    { email: "foo" },
+    {
+      populate: ["favoritePost1", "favoritePost2", "favoritePost3"],
+    },
+  );
   thing(user); // This should be giving an error
+  thing(user1); // This is erroring fine
 
   expect(user.name).toBe("Foo");
 });
