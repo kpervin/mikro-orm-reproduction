@@ -1,5 +1,5 @@
 import { OneToMany, Opt, PrimaryKey, Ref } from "@mikro-orm/core";
-import { Collection, Entity, Property } from "@mikro-orm/sqlite";
+import { Collection, Entity, ManyToOne, Property } from "@mikro-orm/sqlite";
 
 import { Post } from "./post.entity";
 
@@ -17,18 +17,30 @@ export class User {
   @OneToMany(() => Post, "user")
   posts = new Collection<Post>(this);
 
-  @Property({
-    formula: (a) => /*language=sql*/ `
-        ( EXISTS (
-            SELECT 1
-            FROM post p
-            WHERE p.title = 'bar'
-            ))`,
-    // ref: true,
-    lazy: true,
-    persist: false,
-  })
-  hasBarPost!: Opt & Ref<boolean>;
+  @ManyToOne()
+  favoritePost?: Post;
+
+  @ManyToOne()
+  favoritePost1?: Post;
+
+  @ManyToOne()
+  favoritePost2?: Post;
+
+  @ManyToOne()
+  favoritePost3?: Post;
+
+  // @Property({
+  //   formula: (a) => /*language=sql*/ `
+  //       ( EXISTS (
+  //           SELECT 1
+  //           FROM post p
+  //           WHERE p.title = 'bar'
+  //           ))`,
+  //   // ref: true,
+  //   lazy: true,
+  //   persist: false,
+  // })
+  // hasBarPost!: Opt & Ref<boolean>;
 
   constructor(name: string, email: string) {
     this.name = name;

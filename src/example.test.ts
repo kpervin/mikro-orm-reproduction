@@ -1,10 +1,23 @@
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 
-import { MikroORM } from "@mikro-orm/sqlite";
+import { Loaded, MikroORM } from "@mikro-orm/sqlite";
 import { Post } from "./entities/post.entity";
 import { User } from "./entities/user.entity";
 
 let orm: MikroORM;
+
+function thing(
+  user: Loaded<
+    User,
+    | "posts"
+    | "favoritePost"
+    | "favoritePost1"
+    | "favoritePost2"
+    | "favoritePost3"
+  >,
+) {
+  return null;
+}
 
 beforeAll(async () => {
   orm = await MikroORM.init({
@@ -32,10 +45,10 @@ test("basic CRUD example", async () => {
     User,
     { email: "foo" },
     {
-      populate: ["hasBarPost"],
+      populate: ["favoritePost1", "posts", "favoritePost2", "favoritePost3"],
     },
   );
+  thing(user); // This should be giving an error
+
   expect(user.name).toBe("Foo");
-  expect(user.hasBarPost).toBe(true);
-  expect(user.hasBarPost.$).toBeDefined(); // This throws, as it is instead returning as a boolean only
 });
