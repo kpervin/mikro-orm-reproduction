@@ -1,16 +1,17 @@
-import { Entity, MikroORM, PrimaryKey, Property } from "@mikro-orm/sqlite";
+import { defineConfig, MikroORM } from "@mikro-orm/mysql";
 import { Post } from "./entities/post.entity";
 import { User } from "./entities/user.entity";
 
 let orm: MikroORM;
 
 beforeAll(async () => {
-  orm = await MikroORM.init({
-    dbName: ":memory:",
+  orm = await MikroORM.init(defineConfig({
+    // dbName: ":memory:",
     entities: [User, Post],
     debug: ["query", "query-params"],
     allowGlobalContext: true, // only for testing
-  });
+  }));
+  await orm.schema.ensureDatabase();
   await orm.schema.refreshDatabase();
 });
 
