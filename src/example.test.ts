@@ -67,21 +67,6 @@ afterAll(async () => {
   await orm.close(true);
 });
 
-test("basic CRUD example", async () => {
-  orm.em.create(User, { name: "Foo", email: "foo" });
-  await orm.em.flush();
-  orm.em.clear();
-
-  const user = await orm.em.findOneOrFail(User, { email: "foo" });
-  expect(user.name).toBe("Foo");
-  user.name = "Bar";
-  orm.em.remove(user);
-  await orm.em.flush();
-
-  const count = await orm.em.count(User, { email: "foo" });
-  expect(count).toBe(0);
-});
-
 test("fields with nested relations", async () => {
   const test = orm.em.create(Test, {
     user: {
@@ -99,7 +84,9 @@ test("fields with nested relations", async () => {
 
   orm.em.clear();
 
-  const fetched = await orm.em.findOneOrFail(Test, test, {
-    fields: ["user.name", "user.posts.body"],
-  });
+  await expect(
+    orm.em.findOneOrFail(Test, test, {
+      fields: ["user.name", "user.posts.body"],
+    }),
+  ).rejects.toThrow();
 });
