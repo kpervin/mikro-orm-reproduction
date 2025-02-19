@@ -12,8 +12,8 @@
   "include": [
     "./src/**/*.ts"
   ],
-  "ts-node": {
-    "esm": true,
-    "transpileOnly": true
-  }
+//  "ts-node": {
+//    "esm": true,
+//    "transpileOnly": true
+//  }
 }
