@@ -9,13 +9,12 @@ import "tsconfig-paths/register";
 async function waitForMySqlConnection(
   retries = 30,
   delayMs = 3000,
-): Promise<void> {
+): Promise<MikroORM> {
   for (let i = 1; i <= retries; i++) {
     try {
       const orm = await MikroORM.init();
-      await orm.close(true);
       console.log("MySQL is up and MikroORM is ready!");
-      return;
+      return orm;
     } catch (error) {
       assert(error instanceof Error);
       console.log(`Attempt ${i} failed: ${error.message}`);
@@ -36,8 +35,9 @@ module.exports = async () => {
   console.log("Starting docker compose");
   execSync(`yarn pretest`);
 
-  await waitForMySqlConnection();
+  const orm = await waitForMySqlConnection();
 
   console.log("Refreshing Schema");
-  execSync("yarn mikro-orm schema:fresh --run");
+  await orm.schema.refreshDatabase();
+  await orm.close(true);
 };
