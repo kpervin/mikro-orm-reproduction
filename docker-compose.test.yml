@@ -1,0 +1,18 @@
+name: mikro-orm-reproduction
+services:
+  mysql8:
+    image: mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    command: [ "mysqld", "--mysql-native-password=ON" ]
+    volumes:
+      - mysql8:/var/lib/mysql
+
+volumes:
+  mysql8:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
