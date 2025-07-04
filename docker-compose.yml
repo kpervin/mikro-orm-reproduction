@@ -10,7 +10,7 @@ services:
     volumes:
       - mysql8:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot" ]
+      test: [ "CMD", "mysql", "-u", "root", "-proot", "--execute", "SHOW DATABASES;" ]
       interval: 3s
       timeout: 10s
       retries: 10

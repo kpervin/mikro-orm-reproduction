@@ -1,4 +1,4 @@
-import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
+import config from "./mikro-orm.config";
 
 import { MikroORM } from "@mikro-orm/mysql";
 import { Post } from "./entities/post.entity";
@@ -7,17 +7,7 @@ import { User } from "./entities/user.entity";
 let orm: MikroORM;
 
 beforeAll(async () => {
-  orm = await MikroORM.init({
-    metadataProvider: TsMorphMetadataProvider,
-    dbName: "test",
-    user: "root",
-    password: "root",
-    host: "localhost",
-    port: 3306,
-    entities: [User, Post],
-    debug: ["query", "query-params"],
-    allowGlobalContext: true, // only for testing
-  });
+  orm = await MikroORM.init(config);
   await orm.schema.refreshDatabase();
 });
 
