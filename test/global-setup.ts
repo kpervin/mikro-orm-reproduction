@@ -1,11 +1,9 @@
 import { execSync } from "child_process";
 
-const DOCKER_WAIT_TIMEOUT = 30;
-
 export default async (): Promise<void> => {
   console.log("\n[GlobalSetup] Starting Docker services...");
   try {
-    execSync(`docker-compose up -d --wait --timeout ${DOCKER_WAIT_TIMEOUT}`, {
+    execSync(`docker-compose up -d --wait`, {
       stdio: "inherit",
     });
     console.log(
