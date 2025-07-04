@@ -40,6 +40,7 @@ test("basic CRUD example", async () => {
     },
   );
   expect(user.name).toBe("Foo");
-  expect(user.hasBarPost.$).toBeDefined(); // This throws, as it is instead returning as a boolean only
-  expect(user.hasBarPost.$).toEqual(true); // This throws, as it is instead returning as a boolean only
+  expect(user.hasBarPost.$).toBeDefined();
+  expect(typeof user.hasBarPost.$).toEqual("boolean");
+  expect(user.hasBarPost.$).toEqual(true);
 });

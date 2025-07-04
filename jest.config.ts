@@ -12,6 +12,6 @@ const config = {
     ],
   },
   globalSetup: "<rootDir>/test/global-setup.ts",
-  globalTeardown: "<rootDir>/test/global-setup.ts",
+  globalTeardown: "<rootDir>/test/global-teardown.ts",
 } satisfies JestConfigWithTsJest;
 export default config;
