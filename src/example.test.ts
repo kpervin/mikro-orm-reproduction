@@ -1,6 +1,6 @@
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 
-import { MikroORM } from "@mikro-orm/sqlite";
+import { MikroORM } from "@mikro-orm/mysql";
 import { Post } from "./entities/post.entity";
 import { User } from "./entities/user.entity";
 
@@ -9,7 +9,11 @@ let orm: MikroORM;
 beforeAll(async () => {
   orm = await MikroORM.init({
     metadataProvider: TsMorphMetadataProvider,
-    dbName: ":memory:",
+    dbName: "test",
+    user: "root",
+    password: "root",
+    host: "localhost",
+    port: 3306,
     entities: [User, Post],
     debug: ["query", "query-params"],
     allowGlobalContext: true, // only for testing
@@ -36,6 +40,6 @@ test("basic CRUD example", async () => {
     },
   );
   expect(user.name).toBe("Foo");
-  expect(user.hasBarPost).toBe(true);
   expect(user.hasBarPost.$).toBeDefined(); // This throws, as it is instead returning as a boolean only
+  expect(user.hasBarPost.$).toEqual(true); // This throws, as it is instead returning as a boolean only
 });

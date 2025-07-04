@@ -18,17 +18,16 @@ export class User {
   posts = new Collection<Post>(this);
 
   @Property({
-    formula: (a) => /*language=sql*/ `
+    formula: (a) => /*language=mysql*/ `
         ( EXISTS (
             SELECT 1
             FROM post p
-            WHERE p.title = 'bar'
+            WHERE p.title = 'bar' AND p.user_id = ${a}.id
             ))`,
-    // ref: true,
     lazy: true,
     persist: false,
   })
-  hasBarPost!: Opt & Ref<boolean>;
+  hasBarPost!: Ref<boolean> & Opt;
 
   constructor(name: string, email: string) {
     this.name = name;
