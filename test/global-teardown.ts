@@ -1,3 +1,5 @@
+import { execSync } from "child_process";
+
 export default async (): Promise<void> => {
   console.log("\n[GlobalTeardown] Stopping Docker services...");
   try {
