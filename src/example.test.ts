@@ -8,12 +8,12 @@ import mikroOrmConfig from "./mikro-orm.config";
 
 const MetadataProviders = {
   "reflect-metadata": ReflectMetadataProvider,
-  "tsmorph": TsMorphMetadataProvider
+  "tsmorph": TsMorphMetadataProvider,
 } as const;
 
 describe.each([
   "reflect-metadata",
-  "tsmorph"
+  "tsmorph",
 ] as const)("Migrations Test %s", (metadataProvider) => {
   const { User } = require(`./entities/${metadataProvider}/user.entity`);
   const { TestEntity1 } = require(`./entities/${metadataProvider}/test.entity`);
@@ -33,34 +33,20 @@ describe.each([
       await orm.close(true);
     });
 
-    test("without default ref", async () => {
+    test.each([
+      { entity: TestEntity1, title: "without default ref" },
+      { entity: TestEntity2, title: "with default ref" },
+    ])("$title", async ({ entity }) => {
       orm = await MikroORM.init({
         ...mikroOrmConfig,
         metadataProvider: _metadata,
-        entities: [ User, TestEntity1 ],
+        entities: [ User, entity ],
         connect: false,
       });
       const migrator = orm.getMigrator();
       const res = await migrator.createMigration();
       console.log(res.diff.up);
 
-      expect(res.diff.up).toEqual(
-        expect.arrayContaining([
-          expect.stringContaining("`status` enum('New') not null default 'New'"),
-        ]),
-      );
-    });
-
-    test("with default ref", async () => {
-      orm = await MikroORM.init({
-        ...mikroOrmConfig,
-        metadataProvider: _metadata,
-        entities: [ User, TestEntity2 ],
-        connect: false,
-      });
-      const migrator = orm.getMigrator();
-      const res = await migrator.createMigration();
-      console.log(res.diff.up);
       expect(res.diff.up).toEqual(
         expect.arrayContaining([
           expect.stringContaining("`status` enum('New') not null default 'New'"),
@@ -71,11 +57,20 @@ describe.each([
 
   describe("with CLI", () => {
     const migrationsDir = "src/migrations";
-    const expectedValue = "\\`status\\` enum('New') not null default 'New'"
+    const expectedValue = "\\`status\\` enum('New') not null default 'New'";
 
-    test("without default ref", async () => {
-      const migrationName = "test_migration_without_default_ref";
-      execSync(`yarn mikro-orm migration:create -i --config ./src/testconfig-1.${metadataProvider}.ts -n '${migrationName}'`);
+    test.each([
+      {
+        configPath: `./src/testconfig-1.${metadataProvider}.ts`,
+        title: "without default ref",
+      },
+      {
+        configPath: `./src/testconfig-2.${metadataProvider}.ts`,
+        title: "with default ref",
+      },
+    ])("$title", async ({configPath, title}) => {
+      const migrationName = `test_migration_${title.replace(/\s/g,"_")}`;
+      execSync(`yarn mikro-orm migration:create -i --config ${configPath} -n '${migrationName}'`);
       const files = fs.readdirSync(migrationsDir);
       const migrationFile = files.find((f) => f.includes(migrationName));
 
@@ -83,29 +78,11 @@ describe.each([
 
       const migrationContent = fs.readFileSync(
         path.join(migrationsDir, migrationFile!),
-        "utf-8"
+        "utf-8",
       );
 
       expect(migrationContent).toContain(
-        expectedValue
-      );
-    });
-    test("with default ref", async () => {
-      const migrationName = "test_migration_with_default_ref";
-      execSync(`yarn mikro-orm migration:create -i --config ./src/testconfig-2.${metadataProvider}.ts -n '${migrationName}'`);
-
-      const files = fs.readdirSync(migrationsDir);
-      const migrationFile = files.find((f) => f.includes(migrationName));
-
-      expect(migrationFile).toBeDefined();
-
-      const migrationContent = fs.readFileSync(
-        path.join(migrationsDir, migrationFile!),
-        "utf-8"
-      );
-
-      expect(migrationContent).toContain(
-        expectedValue
+        expectedValue,
       );
     });
   });
