@@ -3,17 +3,21 @@
     "module": "NodeNext",
     "target": "ESNext",
     "strict": true,
-    "outDir": "dist",
+    "outDir": "./dist",
+    "rootDir": "./",
+    "noEmit": true,
     "declaration": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "esModuleInterop": true
-  },
-  "include": [
-    "./src/**/*.ts"
-  ],
-  "ts-node": {
-    "esm": true,
-    "transpileOnly": true
+    "esModuleInterop": true,
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "noImplicitAny": true,
+    "noEmitOnError": true,
+    "disableReferencedProjectLoad": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "isolatedModules": true,
   }
 }

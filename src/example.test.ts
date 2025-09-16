@@ -1,51 +1,97 @@
-import { Entity, MikroORM, PrimaryKey, Property } from '@mikro-orm/sqlite';
+import { MikroORM } from "@mikro-orm/mysql";
+import { execSync } from "node:child_process";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { TestEntity1 } from "./entities/test.entity";
+import { TestEntity2 } from "./entities/test2.entity";
+import { User } from "./entities/user.entity";
+import mikroOrmConfig from "./mikro-orm.config";
 
-@Entity()
-class User {
 
-  @PrimaryKey()
-  id!: number;
-
-  @Property()
-  name: string;
-
-  @Property({ unique: true })
-  email: string;
-
-  constructor(name: string, email: string) {
-    this.name = name;
-    this.email = email;
-  }
-
-}
-
-let orm: MikroORM;
-
-beforeAll(async () => {
-  orm = await MikroORM.init({
-    dbName: ':memory:',
-    entities: [User],
-    debug: ['query', 'query-params'],
-    allowGlobalContext: true, // only for testing
+describe("test", () => {
+  afterEach(async () => {
+    execSync(`rm -rf ./src/migrations`);
+    execSync(`rm -rf ./temp`);
   });
-  await orm.schema.refreshDatabase();
-});
 
-afterAll(async () => {
-  await orm.close(true);
-});
+  describe("code-first", () => {
+    let orm: MikroORM;
+    beforeEach(async () => {
+      orm = await MikroORM.init({
+        ...mikroOrmConfig,
+        entities: [ User ],
+        connect: false,
+      });
+    });
 
-test('basic CRUD example', async () => {
-  orm.em.create(User, { name: 'Foo', email: 'foo' });
-  await orm.em.flush();
-  orm.em.clear();
+    afterEach(async () => {
+      await orm.close(true);
+    });
 
-  const user = await orm.em.findOneOrFail(User, { email: 'foo' });
-  expect(user.name).toBe('Foo');
-  user.name = 'Bar';
-  orm.em.remove(user);
-  await orm.em.flush();
+    test("without default ref", async () => {
+      orm.discoverEntity(TestEntity1);
+      const migrator = orm.getMigrator();
+      const res = await migrator.createMigration();
+      console.log(res.diff.up);
 
-  const count = await orm.em.count(User, { email: 'foo' });
-  expect(count).toBe(0);
+      expect(res.diff.up).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining("`status` enum('New') not null default 'New'"),
+        ]),
+      );
+    });
+
+    test("with default ref", async () => {
+      orm.discoverEntity(TestEntity2);
+      const migrator = orm.getMigrator();
+      const res = await migrator.createMigration();
+      console.log(res.diff.up);
+      expect(res.diff.up).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining("`status` enum('New') not null default 'New'"),
+        ]),
+      );
+    });
+  });
+
+  describe("with CLI", () => {
+    const migrationsDir = "src/migrations";
+    const expectedValue = "\\`status\\` enum('New') not null default 'New'"
+
+    test("without default ref", async () => {
+      const migrationName = "test_migration_without_default_ref";
+      execSync(`yarn mikro-orm migration:create -i --config ./src/testconfig-1.ts -n '${migrationName}'`);
+      const files = fs.readdirSync(migrationsDir);
+      const migrationFile = files.find((f) => f.includes(migrationName));
+
+      expect(migrationFile).toBeDefined();
+
+      const migrationContent = fs.readFileSync(
+        path.join(migrationsDir, migrationFile!),
+        "utf-8"
+      );
+
+      expect(migrationContent).toContain(
+        expectedValue
+      );
+    });
+    test("with default ref", async () => {
+      const migrationName = "test_migration_with_default_ref";
+      execSync(`yarn mikro-orm migration:create -i --config ./src/testconfig-2.ts -n '${migrationName}'`);
+
+      const files = fs.readdirSync(migrationsDir);
+      const migrationFile = files.find((f) => f.includes(migrationName));
+
+      expect(migrationFile).toBeDefined();
+
+      const migrationContent = fs.readFileSync(
+        path.join(migrationsDir, migrationFile!),
+        "utf-8"
+      );
+
+      expect(migrationContent).toContain(
+        expectedValue
+      );
+    });
+  });
 });
