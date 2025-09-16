@@ -1,6 +1,6 @@
 import type { Opt } from "@mikro-orm/mysql";
 import { Entity, Enum, PrimaryKey, Property } from "@mikro-orm/mysql";
-import { TestConst, TestEnum } from "./enums";
+import { TestConst, TestEnum } from "../enums";
 
 @Entity()
 export class User {
