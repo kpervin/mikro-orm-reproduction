@@ -7,9 +7,9 @@ const config = {
     "^.+\\.(t|j)s$": "ts-jest",
   },
   transformIgnorePatterns: [
-    "/node_modules/(?!uuid)", // 👈 allow uuid to be transformed
+    "/node_modules/(?!uuid)",
   ],
-  globalSetup: "<rootDir>/test/global-setup.ts",
-  globalTeardown: "<rootDir>/test/global-setup.ts",
+  // globalSetup: "<rootDir>/test/global-setup.ts",
+  // globalTeardown: "<rootDir>/test/global-setup.ts",
 } satisfies JestConfigWithTsJest;
 export default config;

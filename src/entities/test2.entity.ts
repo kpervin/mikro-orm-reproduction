@@ -7,7 +7,7 @@ import {
   type Ref,
 } from "@mikro-orm/mysql";
 import { AutoIncrementEntity } from "./default.entity";
-import { Status, SYSTEM_USER_ID } from "../enums";
+import { Status, SYSTEM_USER_ID } from "./enums";
 import { User } from "./user.entity";
 
 @Entity()

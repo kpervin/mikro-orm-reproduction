@@ -1,0 +1,106 @@
+diff --git a/.idea/.gitignore b/.idea/.gitignore
+new file mode 100644
+index 0000000000000000000000000000000000000000..13566b81b018ad684f3a35fee301741b2734c8f4
+--- /dev/null
++++ b/.idea/.gitignore
+@@ -0,0 +1,8 @@
++# Default ignored files
++/shelf/
++/workspace.xml
++# Editor-based HTTP Client requests
++/httpRequests/
++# Datasource local storage ignored files
++/dataSources/
++/dataSources.local.xml
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+new file mode 100644
+index 0000000000000000000000000000000000000000..517be50b197a1fa3282a1b34c923373c4c81e153
+--- /dev/null
++++ b/.idea/misc.xml
+@@ -0,0 +1,17 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="SFDXConfigListPersistentComponent">
++    <option name="configInfos">
++      <list>
++        <SFDXConfigInfo>
++          <option name="key" value="target-dev-hub" />
++          <option name="location" value="Global" />
++          <option name="value" value="kristofer.pervin@adaptiiv.com.krisdev" />
++        </SFDXConfigInfo>
++      </list>
++    </option>
++  </component>
++  <component name="SalesForce.credentials">
++    <account>&lt;No Account&gt;</account>
++  </component>
++</project>
+\ No newline at end of file
+diff --git a/.idea/modules.xml b/.idea/modules.xml
+new file mode 100644
+index 0000000000000000000000000000000000000000..e64c0b2ffeffc5ec71510b53e8c42150b2206e26
+--- /dev/null
++++ b/.idea/modules.xml
+@@ -0,0 +1,8 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectModuleManager">
++    <modules>
++      <module fileurl="file://$PROJECT_DIR$/.idea/user.iml" filepath="$PROJECT_DIR$/.idea/user.iml" />
++    </modules>
++  </component>
++</project>
+\ No newline at end of file
+diff --git a/.idea/user.iml b/.idea/user.iml
+new file mode 100644
+index 0000000000000000000000000000000000000000..0b872d82d9c39f70bff219b3b4b60145430f8984
+--- /dev/null
++++ b/.idea/user.iml
+@@ -0,0 +1,12 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<module type="WEB_MODULE" version="4">
++  <component name="NewModuleRootManager">
++    <content url="file://$MODULE_DIR$">
++      <excludeFolder url="file://$MODULE_DIR$/.tmp" />
++      <excludeFolder url="file://$MODULE_DIR$/temp" />
++      <excludeFolder url="file://$MODULE_DIR$/tmp" />
++    </content>
++    <orderEntry type="inheritedJdk" />
++    <orderEntry type="sourceFolder" forTests="false" />
++  </component>
++</module>
+\ No newline at end of file
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+new file mode 100644
+index 0000000000000000000000000000000000000000..556ba8e154797b8dce5fd5785a46bbf849abe9c6
+--- /dev/null
++++ b/.idea/workspace.xml
+@@ -0,0 +1,13 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectViewState">
++    <option name="hideEmptyMiddlePackages" value="true" />
++    <option name="showLibraryContents" value="true" />
++  </component>
++  <component name="PropertiesComponent">{
++  &quot;keyToString&quot;: {
++    &quot;last_opened_file_path&quot;: &quot;//wsl.localhost/Debian/home/kpervin/projects&quot;,
++    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.ide.settings.web.browsers&quot;
++  }
++}</component>
++</project>
+\ No newline at end of file
+diff --git a/metadata/MetadataDiscovery.js b/metadata/MetadataDiscovery.js
+index 43390a22b36beb6000872f1574e1f60981e46a8f..2f897f44cc0f376fc23ce573de4cbffc7dd196db 100644
+--- a/metadata/MetadataDiscovery.js
++++ b/metadata/MetadataDiscovery.js
+@@ -1044,7 +1044,8 @@ class MetadataDiscovery {
+                 prop.type = prop.runtimeType = Utils_1.Utils.getObjectType(entity1[prop.name]);
+             }
+         }
+-        catch {
++        catch(e) {
++          console.error(e);
+             // ignore
+         }
+     }

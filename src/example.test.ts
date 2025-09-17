@@ -1,26 +1,13 @@
-import { MikroORM, ReflectMetadataProvider } from "@mikro-orm/mysql";
-import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
+import { MikroORM } from "@mikro-orm/mysql";
 import { execSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { TestEntity1 } from "./entities/test.entity";
+import { TestEntity2 } from "./entities/test2.entity";
+import { User } from "./entities/user.entity";
 import mikroOrmConfig from "./mikro-orm.config";
 
-
-const MetadataProviders = {
-  "reflect-metadata": ReflectMetadataProvider,
-  "tsmorph": TsMorphMetadataProvider,
-} as const;
-
-describe.each([
-  "reflect-metadata",
-  "tsmorph",
-] as const)("Migrations Test %s", (metadataProvider) => {
-  const { User } = require(`./entities/${metadataProvider}/user.entity`);
-  const { TestEntity1 } = require(`./entities/${metadataProvider}/test.entity`);
-  const { TestEntity2 } = require(`./entities/${metadataProvider}/test2.entity`);
-
-  const _metadata = MetadataProviders[metadataProvider];
-
+describe("Migrations Test", () => {
   afterEach(async () => {
     execSync(`rm -rf ./src/migrations`);
     execSync(`rm -rf ./temp`);
@@ -39,7 +26,6 @@ describe.each([
     ])("$title", async ({ entity }) => {
       orm = await MikroORM.init({
         ...mikroOrmConfig,
-        metadataProvider: _metadata,
         entities: [ User, entity ],
         connect: false,
       });
@@ -61,16 +47,16 @@ describe.each([
 
     test.each([
       {
-        configPath: `./src/testconfig-1.${metadataProvider}.ts`,
+        configPath: `./src/testconfig-1.ts`,
         title: "without default ref",
       },
       {
-        configPath: `./src/testconfig-2.${metadataProvider}.ts`,
+        configPath: `./src/testconfig-2.ts`,
         title: "with default ref",
       },
-    ])("$title", async ({configPath, title}) => {
-      const migrationName = `test_migration_${title.replace(/\s/g,"_")}`;
-      execSync(`yarn mikro-orm migration:create -i --config ${configPath} -n '${migrationName}'`);
+    ])("$title", async ({ configPath, title }) => {
+      const migrationName = `test_migration_${title.replace(/\s/g, "_")}`;
+      execSync(`yarn mikro-orm migration:create --config ${configPath} -n '${migrationName}'`);
       const files = fs.readdirSync(migrationsDir);
       const migrationFile = files.find((f) => f.includes(migrationName));
 

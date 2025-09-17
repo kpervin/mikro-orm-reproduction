@@ -1,7 +1,9 @@
 import { Migrator } from "@mikro-orm/migrations";
 import { defineConfig, MySqlDriver } from "@mikro-orm/mysql";
+import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 
 export default defineConfig({
+  metadataProvider: TsMorphMetadataProvider,
   driver: MySqlDriver,
   dbName: "mikro-orm-reproduction",
   user: "root",
