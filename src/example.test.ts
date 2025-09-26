@@ -22,13 +22,19 @@ class User {
   @OneToMany({
     entity: () => Post,
     mappedBy: (post) => post.user,
+  })
+  posts = new Collection<Post>(this);
+
+  @OneToMany({
+    entity: () => Post,
+    mappedBy: (post) => post.user,
     where: {
       metadata: {
         valid: true
       }
     }
   })
-  posts = new Collection<Post>(this);
+  validPosts = new Collection<Post>(this);
 
   constructor(name: string, email: string) {
     this.name = name;
@@ -86,5 +92,11 @@ test("basic CRUD example", async () => {
 
   await expect(orm.em.findOneOrFail(User, { email: "foo" }, {
     populate: [ "posts" ]
+  })).resolves.toBeTruthy();
+
+  orm.em.clear();
+
+  await expect(orm.em.findOneOrFail(User, { email: "foo" }, {
+    populate: [ "validPosts" ]
   })).resolves.toBeTruthy();
 });
