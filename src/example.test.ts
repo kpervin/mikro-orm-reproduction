@@ -10,7 +10,7 @@ describe("Tests", () => {
   beforeAll(async () => {
     orm = await MikroORM.init({
       metadataProvider: TsMorphMetadataProvider,
-      dbName: ':memory:',
+      dbName: ":memory:",
       entities: [ User, Post ],
       debug: [ "query", "query-params" ],
       allowGlobalContext: true, // only for testing
@@ -22,37 +22,92 @@ describe("Tests", () => {
     await orm.close(true);
   });
 
-  test("should populate and load `hasBarPost`", async () => {
-    const u = orm.em.create(User, { name: "Foo", email: "foo" });
-    orm.em.create(Post, { title: "foo", user: u });
-    await orm.em.flush();
-    orm.em.clear();
+  describe("should populate and load `hasBarPost` when bar post is added", () => {
+    beforeAll(async () => {
+      const u = orm.em.create(User, { name: "Foo", email: "foo" });
+      orm.em.create(Post, { title: "foo", user: u });
+      orm.em.create(Post, { title: "bar", user: u });
+      await orm.em.flush();
+    });
 
-    const user = await orm.em.findOneOrFail(
-      User,
-      { email: "foo" },
-      {
-        populate: [ "hasBarPost" ]
-      }
-    );
-    expect(user.hasBarPost.isInitialized()).toEqual(true);
+    beforeEach(() => {
+      orm.em.clear();
+    });
+
+    test("populated in find", async () => {
+      const user = await orm.em.findOneOrFail(
+        User,
+        { email: "foo" },
+        {
+          populate: [ "hasBarPost" ],
+        },
+      );
+      expect(user.hasBarPost.isInitialized()).toEqual(true);
+      expect(user.hasBarPost.$).toEqual("true");
+    });
+
+    test("using Reference.load()", async () => {
+      const user = await orm.em.findOneOrFail(
+        User,
+        { email: "foo" },
+      );
+      await user.hasBarPost.load();
+      expect(user.hasBarPost.isInitialized()).toEqual(true);
+      expect(await user.hasBarPost.load()).toEqual("true");
+    });
+
+    test("using em.populate()", async () => {
+      const user = await orm.em.findOneOrFail(
+        User,
+        { email: "foo" },
+      );
+      await orm.em.populate(user, ["hasBarPost"]);
+      expect(user.hasBarPost.isInitialized()).toEqual(true);
+      expect(await user.hasBarPost.load()).toEqual("true");
+    })
   });
 
-  test("should initialize and load `hasBarPost`", async () => {
-    const u = orm.em.create(User, { name: "Foo", email: "foo" });
-    orm.em.create(Post, { title: "foo", user: u });
-    await orm.em.flush();
-    orm.em.clear();
+  describe("should populate and load `hasBarPost` when no bar post is added", () => {
+    beforeAll(async () => {
+      const u = orm.em.create(User, { name: "Foo", email: "foo" });
+      orm.em.create(Post, { title: "foo", user: u });
+      await orm.em.flush();
+    });
 
-    const user = await orm.em.findOneOrFail(
-      User,
-      { email: "foo" },
-    );
-    await user.email.load();
-    expect(user.email.isInitialized()).toEqual(true);
+    beforeEach(() => {
+      orm.em.clear();
+    });
 
-    await user.hasBarPost.load(); // this does not work
-    await orm.em.populate(user, [ "hasBarPost" ]); // neither does this
-    expect(user.hasBarPost.isInitialized()).toEqual(true);
+    test("populated in find", async () => {
+      const user = await orm.em.findOneOrFail(
+        User,
+        { email: "foo" },
+        {
+          populate: [ "hasBarPost" ],
+        },
+      );
+      expect(user.hasBarPost.isInitialized()).toEqual(true);
+      expect(user.hasBarPost.$).toEqual(null);
+    });
+
+    test("using Reference.load()", async () => {
+      const user = await orm.em.findOneOrFail(
+        User,
+        { email: "foo" },
+      );
+      await user.hasBarPost.load();
+      expect(user.hasBarPost.isInitialized()).toEqual(true);
+      expect(await user.hasBarPost.load()).toEqual(null);
+    });
+
+    test("using em.populate()", async () => {
+      const user = await orm.em.findOneOrFail(
+        User,
+        { email: "foo" },
+      );
+      await orm.em.populate(user, [ "hasBarPost" ]);
+      expect(user.hasBarPost.isInitialized()).toEqual(true);
+      expect(await user.hasBarPost.load()).toEqual(null);
+    })
   });
-})
+});
