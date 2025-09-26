@@ -28,4 +28,7 @@ export class User {
     persist: false,
   })
   hasBarPost!: Opt<Ref<string | null>>;
+
+  @Property({ lazy: true })
+  scalarRef?: Ref<string>;
 }

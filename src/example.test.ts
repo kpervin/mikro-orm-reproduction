@@ -81,6 +81,18 @@ describe("Tests", () => {
       orm.em.clear();
     });
 
+    test("scalarRef returns null", async () => {
+      const user = await orm.em.findOneOrFail(
+        User,
+        { email },
+        {
+          populate: [ "scalarRef" ],
+        },
+      );
+      expect(user.scalarRef?.isInitialized()).toEqual(true);
+      expect(user.scalarRef?.$).toEqual(null);
+    })
+
     test("populated in find", async () => {
       const user = await orm.em.findOneOrFail(
         User,
