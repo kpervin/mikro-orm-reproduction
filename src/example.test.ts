@@ -1,4 +1,11 @@
-import { Entity, MikroORM, PrimaryKey, Property } from '@mikro-orm/sqlite';
+import {
+  Embeddable,
+  Embedded,
+  Entity,
+  MikroORM, Opt,
+  PrimaryKey,
+  Property, Collection, ManyToOne, OneToMany,
+} from "@mikro-orm/sqlite";
 
 @Entity()
 class User {
@@ -12,20 +19,51 @@ class User {
   @Property({ unique: true })
   email: string;
 
+  @OneToMany({
+    entity: () => Post,
+    mappedBy: (post) => post.user,
+    where: {
+      metadata: {
+        valid: true
+      }
+    }
+  })
+  posts = new Collection<Post>(this);
+
   constructor(name: string, email: string) {
     this.name = name;
     this.email = email;
   }
+}
 
+@Embeddable()
+class Metadata {
+  @Property()
+  valid: Opt<boolean> = true;
+}
+
+@Entity()
+class Post {
+  @PrimaryKey()
+  id!: number;
+
+  @Property()
+  body!: string;
+
+  @ManyToOne(() => User)
+  user!: User;
+
+  @Embedded(() => Metadata)
+  metadata: Opt<Metadata> = new Metadata();
 }
 
 let orm: MikroORM;
 
 beforeAll(async () => {
   orm = await MikroORM.init({
-    dbName: ':memory:',
-    entities: [User],
-    debug: ['query', 'query-params'],
+    dbName: ":memory:",
+    entities: [ User ],
+    debug: [ "query", "query-params" ],
     allowGlobalContext: true, // only for testing
   });
   await orm.schema.refreshDatabase();
@@ -35,17 +73,18 @@ afterAll(async () => {
   await orm.close(true);
 });
 
-test('basic CRUD example', async () => {
-  orm.em.create(User, { name: 'Foo', email: 'foo' });
+test("basic CRUD example", async () => {
+  const _user = orm.em.create(User, { name: "Foo", email: "foo" });
+  orm.em.create(Post, { user: _user, body: "hello world" });
+  orm.em.create(Post, {
+    user: _user,
+    body: "foo bar",
+    metadata: { valid: false },
+  });
   await orm.em.flush();
   orm.em.clear();
 
-  const user = await orm.em.findOneOrFail(User, { email: 'foo' });
-  expect(user.name).toBe('Foo');
-  user.name = 'Bar';
-  orm.em.remove(user);
-  await orm.em.flush();
-
-  const count = await orm.em.count(User, { email: 'foo' });
-  expect(count).toBe(0);
+  await expect(orm.em.findOneOrFail(User, { email: "foo" }, {
+    populate: [ "posts" ]
+  })).resolves.toBeTruthy();
 });
