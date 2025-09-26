@@ -45,7 +45,7 @@ class User {
 @Embeddable()
 class Metadata {
   @Property()
-  valid: Opt<boolean> = true;
+  valid: Opt<boolean> = false;
 }
 
 @Entity()
@@ -81,12 +81,14 @@ afterAll(async () => {
 
 test("basic CRUD example", async () => {
   const _user = orm.em.create(User, { name: "Foo", email: "foo" });
-  orm.em.create(Post, { user: _user, body: "hello world" });
-  orm.em.create(Post, {
+  const post1 = orm.em.create(Post, { user: _user, body: "hello world" });
+  expect(post1.metadata.valid).toBe(false);
+  const post2 = orm.em.create(Post, {
     user: _user,
     body: "foo bar",
-    metadata: { valid: false },
+    metadata: { valid: true },
   });
+  expect(post2.metadata.valid).toBe(true);
   await orm.em.flush();
   orm.em.clear();
 
