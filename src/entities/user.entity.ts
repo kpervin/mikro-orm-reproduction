@@ -9,28 +9,23 @@ export class User {
   id!: number;
 
   @Property()
-  name: string;
+  name!: string;
 
-  @Property({ unique: true })
-  email: string;
+  @Property({ unique: true, lazy: true })
+  email!: Ref<string>;
 
   @OneToMany(() => Post, "user")
   posts = new Collection<Post>(this);
 
   @Property({
-    formula: (a) => /*language=mysql*/ `
-        ( EXISTS (
+    formula: (a) => `
+        ( CASE WHEN EXISTS (
             SELECT 1
             FROM post p
             WHERE p.title = 'bar' AND p.user_id = ${a}.id
-            ))`,
+            ) THEN "true" ELSE NULL END) `,
     lazy: true,
     persist: false,
   })
-  hasBarPost!: Ref<boolean> & Opt;
-
-  constructor(name: string, email: string) {
-    this.name = name;
-    this.email = email;
-  }
+  hasBarPost!: Opt<Ref<string | null>>;
 }

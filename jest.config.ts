@@ -6,12 +6,9 @@ const config = {
     "^.+\\.tsx?$": [
       "ts-jest",
       {
-        // tsconfig: 'tsconfig.json',
         isolatedModules: true,
       },
     ],
   },
-  globalSetup: "<rootDir>/test/global-setup.ts",
-  globalTeardown: "<rootDir>/test/global-teardown.ts",
 } satisfies JestConfigWithTsJest;
 export default config;
