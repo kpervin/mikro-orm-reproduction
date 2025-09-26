@@ -4,7 +4,7 @@ import {
   Entity,
   MikroORM, Opt,
   PrimaryKey,
-  Property, Collection, ManyToOne, OneToMany,
+  Property, Collection, ManyToOne, OneToMany, PopulateHint,
 } from "@mikro-orm/sqlite";
 
 @Entity()
@@ -30,9 +30,9 @@ class User {
     mappedBy: (post) => post.user,
     where: {
       metadata: {
-        valid: true
-      }
-    }
+        valid: true,
+      },
+    },
   })
   validPosts = new Collection<Post>(this);
 
@@ -91,12 +91,34 @@ test("basic CRUD example", async () => {
   orm.em.clear();
 
   await expect(orm.em.findOneOrFail(User, { email: "foo" }, {
-    populate: [ "posts" ]
+    populate: [ "posts" ],
   })).resolves.toBeTruthy();
 
   orm.em.clear();
 
+  await expect(orm.em.findOneOrFail(User, {
+    email: "foo",
+    posts: { metadata: { valid: true } },
+  }, {
+    populate: [ "posts" ],
+    populateWhere: PopulateHint.INFER,
+  })).resolves.toBeTruthy();
+
+  const populatedPostUser = await orm.em.findOneOrFail(User, {
+    email: "foo",
+    posts: { metadata: { valid: true } },
+  }, {
+    populate: [ "posts" ],
+    populateWhere: PopulateHint.INFER,
+  });
+
+  expect(populatedPostUser.posts.$.getItems()).not.toContainEqual(expect.objectContaining({
+    metadata: { valid: false },
+  }));
+
+  orm.em.clear();
+
   await expect(orm.em.findOneOrFail(User, { email: "foo" }, {
-    populate: [ "validPosts" ]
+    populate: [ "validPosts" ],
   })).resolves.toBeTruthy();
 });
