@@ -23,8 +23,10 @@ describe("Tests", () => {
   });
 
   describe("should populate and load `hasBarPost` when bar post is added", () => {
+    const email = "foo";
+
     beforeAll(async () => {
-      const u = orm.em.create(User, { name: "Foo", email: "foo" });
+      const u = orm.em.create(User, { name: "Foo", email });
       orm.em.create(Post, { title: "foo", user: u });
       orm.em.create(Post, { title: "bar", user: u });
       await orm.em.flush();
@@ -37,7 +39,7 @@ describe("Tests", () => {
     test("populated in find", async () => {
       const user = await orm.em.findOneOrFail(
         User,
-        { email: "foo" },
+        { email },
         {
           populate: [ "hasBarPost" ],
         },
@@ -49,7 +51,7 @@ describe("Tests", () => {
     test("using Reference.load()", async () => {
       const user = await orm.em.findOneOrFail(
         User,
-        { email: "foo" },
+        { email },
       );
       await user.hasBarPost.load();
       expect(user.hasBarPost.isInitialized()).toEqual(true);
@@ -59,7 +61,7 @@ describe("Tests", () => {
     test("using em.populate()", async () => {
       const user = await orm.em.findOneOrFail(
         User,
-        { email: "foo" },
+        { email },
       );
       await orm.em.populate(user, ["hasBarPost"]);
       expect(user.hasBarPost.isInitialized()).toEqual(true);
@@ -68,8 +70,9 @@ describe("Tests", () => {
   });
 
   describe("should populate and load `hasBarPost` when no bar post is added", () => {
+    const email = "bar";
     beforeAll(async () => {
-      const u = orm.em.create(User, { name: "Foo", email: "foo" });
+      const u = orm.em.create(User, { name: "Foo", email });
       orm.em.create(Post, { title: "foo", user: u });
       await orm.em.flush();
     });
@@ -81,7 +84,7 @@ describe("Tests", () => {
     test("populated in find", async () => {
       const user = await orm.em.findOneOrFail(
         User,
-        { email: "foo" },
+        { email },
         {
           populate: [ "hasBarPost" ],
         },
@@ -93,7 +96,7 @@ describe("Tests", () => {
     test("using Reference.load()", async () => {
       const user = await orm.em.findOneOrFail(
         User,
-        { email: "foo" },
+        { email },
       );
       await user.hasBarPost.load();
       expect(user.hasBarPost.isInitialized()).toEqual(true);
@@ -103,7 +106,7 @@ describe("Tests", () => {
     test("using em.populate()", async () => {
       const user = await orm.em.findOneOrFail(
         User,
-        { email: "foo" },
+        { email },
       );
       await orm.em.populate(user, [ "hasBarPost" ]);
       expect(user.hasBarPost.isInitialized()).toEqual(true);
